@@ -1,4 +1,4 @@
-# 1 "POT_ADC.c"
+# 1 "main.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,7 +6,7 @@
 # 1 "<built-in>" 2
 # 1 "C:/Program Files (x86)/Microchip/MPLABX/v5.40/packs/Microchip/PIC16Fxxx_DFP/1.2.33/xc8\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "POT_ADC.c" 2
+# 1 "main.c" 2
 
 
 
@@ -2508,7 +2508,7 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 # 28 "C:/Program Files (x86)/Microchip/MPLABX/v5.40/packs/Microchip/PIC16Fxxx_DFP/1.2.33/xc8\\pic\\include\\xc.h" 2 3
-# 21 "POT_ADC.c" 2
+# 21 "main.c" 2
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.31\\pic\\include\\c90\\stdint.h" 1 3
 # 13 "C:\\Program Files\\Microchip\\xc8\\v2.31\\pic\\include\\c90\\stdint.h" 3
@@ -2643,7 +2643,7 @@ typedef int16_t intptr_t;
 
 
 typedef uint16_t uintptr_t;
-# 22 "POT_ADC.c" 2
+# 22 "main.c" 2
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.31\\pic\\include\\c90\\stdio.h" 1 3
 
@@ -2742,7 +2742,7 @@ extern int vsscanf(const char *, const char *, va_list) __attribute__((unsupport
 #pragma printf_check(sprintf) const
 extern int sprintf(char *, const char *, ...);
 extern int printf(const char *, ...);
-# 23 "POT_ADC.c" 2
+# 23 "main.c" 2
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.31\\pic\\include\\c90\\stdlib.h" 1 3
 
@@ -2827,78 +2827,131 @@ extern char * ltoa(char * buf, long val, int base);
 extern char * ultoa(char * buf, unsigned long val, int base);
 
 extern char * ftoa(float f, int * status);
-# 24 "POT_ADC.c" 2
+# 24 "main.c" 2
+# 41 "main.c"
+# 1 "./Lib_LCD.h" 1
+# 59 "./Lib_LCD.h"
+void Lcd_Port(char a) {
+    if (a & 1)
+        RD0 = 1;
+    else
+        RD0 = 0;
+
+    if (a & 2)
+        RD1 = 1;
+    else
+        RD1 = 0;
+
+    if (a & 4)
+        RD2 = 1;
+    else
+        RD2 = 0;
+
+    if (a & 8)
+        RD3 = 1;
+    else
+        RD3 = 0;
+
+    if (a & 16)
+        RD4 = 1;
+    else
+        RD4 = 0;
+
+    if (a & 32)
+        RD5 = 1;
+    else
+        RD5 = 0;
+
+    if (a & 64)
+        RD6 = 1;
+    else
+        RD6 = 0;
+
+    if (a & 128)
+        RD7 = 1;
+    else
+        RD7 = 0;
+
+}
+
+void Lcd_Cmd(char a) {
+    RE0 = 0;
+    Lcd_Port(a);
+    RE1 = 1;
+    _delay((unsigned long)((4)*(8000000/4000.0)));
+    RE1 = 0;
+}
+
+void Lcd_Clear(void) {
+
+    Lcd_Cmd(1);
+}
+
+void Lcd_Set_Cursor(char a, char b) {
+    char temp, y, z;
+    if (a == 1) {
+        temp = 0x80 + b - 1;
 
 
 
+        Lcd_Cmd(temp);
+
+    } else if (a == 2) {
+        temp = 0xC0 + b - 1;
 
 
 
-# 1 "./Lib_ADC.h" 1
-# 18 "./Lib_ADC.h"
-unsigned ADC_CHANNEL(unsigned short canal)
-{
+        Lcd_Cmd(temp);
 
-    switch (canal) {
-        case 0:
-            ADCON0bits.CHS3 = 0;
-            ADCON0bits.CHS2 = 0;
-            ADCON0bits.CHS1 = 0;
-            ADCON0bits.CHS0 = 0;
-
-            break;
-
-        default:
-            ADCON0bits.CHS3 = 0;
-            ADCON0bits.CHS2 = 0;
-            ADCON0bits.CHS1 = 0;
-            ADCON0bits.CHS0 = 0;
-            break;
     }
+}
+
+void Lcd_Init(void) {
+    _delay((unsigned long)((20)*(8000000/4000.0)));
+    Lcd_Cmd (0x30);
+    _delay((unsigned long)((5)*(8000000/4000.0)));
+    Lcd_Cmd (0x30);
+    _delay((unsigned long)((100)*(8000000/4000000.0)));
+    Lcd_Cmd (0x30);
+    _delay((unsigned long)((100)*(8000000/4000000.0)));
+    Lcd_Cmd (0x38);
+    _delay((unsigned long)((60)*(8000000/4000000.0)));
+    Lcd_Cmd (0x08);
+    _delay((unsigned long)((60)*(8000000/4000000.0)));
+    Lcd_Cmd (0x01);
+    _delay((unsigned long)((5)*(8000000/4000.0)));
+    Lcd_Cmd (0x06);
+    _delay((unsigned long)((60)*(8000000/4000000.0)));
+    Lcd_Cmd (0x0C);
+    _delay((unsigned long)((60)*(8000000/4000000.0)));
+
 
 }
 
-void ADC_INIT(void) {
-    ADCON1 = 0b00000000;
+void Lcd_Write_Char(char a) {
+
+    RE0 = 1;
+    Lcd_Port(a);
+    RE1 = 1;
+    _delay((unsigned long)((40)*(8000000/4000000.0)));
+    RE1 = 0;
 }
-# 30 "POT_ADC.c" 2
 
-# 1 "./SPI.h" 1
-# 17 "./SPI.h"
-typedef enum
-{
-    SPI_MASTER_OSC_DIV4 = 0b00100000,
-    SPI_MASTER_OSC_DIV16 = 0b00100001,
-    SPI_MASTER_OSC_DIV64 = 0b00100010,
-    SPI_MASTER_TMR2 = 0b00100011,
-    SPI_SLAVE_SS_EN = 0b00100100,
-    SPI_SLAVE_SS_DIS = 0b00100101
-}Spi_Type;
+void Lcd_Write_String(char *a) {
+    int i;
+    for (i = 0; a[i] != '\0'; i++)
+        Lcd_Write_Char(a[i]);
+}
 
-typedef enum
-{
-    SPI_DATA_SAMPLE_MIDDLE = 0b00000000,
-    SPI_DATA_SAMPLE_END = 0b10000000
-}Spi_Data_Sample;
+void Lcd_Shift_Right(void) {
+    Lcd_Cmd(0x1C);
+}
 
-typedef enum
-{
-    SPI_CLOCK_IDLE_HIGH = 0b00010000,
-    SPI_CLOCK_IDLE_LOW = 0b00000000
-}Spi_Clock_Idle;
+void Lcd_Shift_Left(void) {
+    Lcd_Cmd(0x18);
+}
+# 41 "main.c" 2
 
-typedef enum
-{
-    SPI_IDLE_2_ACTIVE = 0b00000000,
-    SPI_ACTIVE_2_IDLE = 0b01000000
-}Spi_Transmit_Edge;
-
-
-void spiInit(Spi_Type, Spi_Data_Sample, Spi_Clock_Idle, Spi_Transmit_Edge);
-void spiWrite(char);
-unsigned spiDataReady();
-char spiRead();
-# 31 "POT_ADC.c" 2
 
 
 
@@ -2906,98 +2959,54 @@ char spiRead();
 void CONFIG_IO(void);
 void OSCILADOR(void);
 void ADC_INTERRUPT(void);
-void ADC(void);
-void INTER(void);
+void Mandar1(void);
+void Mandar2(void);
 
 
 
-
-double volt;
-
-
-
-
-
-void __attribute__((picinterrupt(("")))) isr(void){
-   if(SSPIF == 1){
-        PORTD = spiRead();
-        spiWrite(PORTB);
-        SSPIF = 0;
-    }
-}
-
-
+char data[16];
+float volt, volt2;
 
 void main(void) {
     CONFIG_IO();
-    OSCILADOR();
-    ADC_INIT();
-    ADC_INTERRUPT();
-    INTER();
+    spiInit(SPI_MASTER_OSC_DIV4, SPI_DATA_SAMPLE_MIDDLE, SPI_CLOCK_IDLE_LOW, SPI_IDLE_2_ACTIVE);
+    while(1){
+       PORTCbits.RC2 = 0;
+       _delay((unsigned long)((1)*(8000000/4000.0)));
 
-    while (1) {
+       spiWrite(PORTB);
+       PORTD = spiRead();
 
-        ADC();
+       _delay((unsigned long)((1)*(8000000/4000.0)));
+       PORTCbits.RC2 = 1;
 
-        _delay((unsigned long)((1)*(8000000/4000.0)));
-
-        PORTB--;
        _delay((unsigned long)((250)*(8000000/4000.0)));
-
+       PORTB++;
     }
-
     return;
 }
 
 
-    void CONFIG_IO(void) {
-    ANSEL = 0b00000001;
-    ANSELH = 0;
-    TRISA = 0b00000001;
+void CONFIG_IO(void) {
+    TRISA = 0;
     TRISB = 0;
+    TRISCbits.TRISC5 = 0;
+    TRISCbits.TRISC3 = 0;
     TRISD = 0;
     TRISE = 0;
+
+    ANSEL = 0;
+    ANSELH = 0;
+    TRISC2 = 0;
+    TRISB = 0;
+    TRISD = 0;
+    PORTCbits.RC2 = 1;
+
+
 
     PORTA = 0;
     PORTB = 0;
     PORTC = 0;
     PORTD = 0;
-
-    spiInit(SPI_SLAVE_SS_EN, SPI_DATA_SAMPLE_MIDDLE, SPI_CLOCK_IDLE_LOW, SPI_IDLE_2_ACTIVE);
-}
-
-void OSCILADOR(void) {
-    OSCCON = 0b01110001;
-}
-
-
-void ADC_INTERRUPT() {
-    PIE1bits.ADIE = 0;
-    PIR1bits.ADIF = 0;
-    OPTION_REG = 0b00000000;
-    INTCON = 0b00000000;
-}
-
-void ADC(void) {
-    ADC_CHANNEL(0);
-
-    ADCON0bits.ADCS0 = 1;
-    ADCON0bits.ADCS1 = 0;
-    ADCON0bits.ADON = 1;
-    _delay((unsigned long)((0.25)*(8000000/4000.0)));
-    ADCON0bits.GO = 1;
-    while (ADCON0bits.GO == 1) {
-
-
-        volt = ((ADRESH * 5.0) / 255);
-    }
-
-}
-
-void INTER(void){
-    INTCONbits.GIE = 1;
-    INTCONbits.PEIE = 1;
-    PIR1bits.SSPIF = 0;
-    PIE1bits.SSPIE = 1;
-    TRISAbits.TRISA5 = 1;
+    PORTE = 0;
 }

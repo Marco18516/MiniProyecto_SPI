@@ -55,5 +55,45 @@ char data[16];//Variable para mostrar datos en LCD
 float volt, volt2;//Variable para voltajes de POTs
 
 void main(void) {
+    CONFIG_IO();
+    spiInit(SPI_MASTER_OSC_DIV4, SPI_DATA_SAMPLE_MIDDLE, SPI_CLOCK_IDLE_LOW, SPI_IDLE_2_ACTIVE);
+    while(1){
+       PORTCbits.RC2 = 0;       //Slave Select
+       __delay_ms(1);
+       
+       spiWrite(PORTB);
+       PORTD = spiRead();
+       
+       __delay_ms(1);
+       PORTCbits.RC2 = 1;       //Slave Deselect 
+       
+       __delay_ms(250);
+       PORTB++;
+    }
     return;
+}
+
+//Configuracion de puertos de entrada y salida
+void CONFIG_IO(void) { 
+    TRISA = 0; //Salida.
+    TRISB = 0; 
+    TRISCbits.TRISC5 = 0;
+    TRISCbits.TRISC3 = 0;
+    TRISD = 0; //Salida
+    TRISE = 0; //Salida
+    
+    ANSEL = 0;
+    ANSELH = 0;
+    TRISC2 = 0;
+    TRISB = 0;
+    TRISD = 0;
+    PORTCbits.RC2 = 1;
+    
+    
+    // Se limpian los puertos
+    PORTA = 0; 
+    PORTB = 0;
+    PORTC = 0;
+    PORTD = 0;
+    PORTE = 0;
 }

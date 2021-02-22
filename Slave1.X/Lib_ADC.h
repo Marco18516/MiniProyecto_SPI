@@ -15,7 +15,8 @@
 #endif
 
 #include <xc.h> // include processor files - each processor file is guarded.  
-unsigned ADC_CHANNEL(unsigned short canal) { //FOSC/8
+unsigned ADC_CHANNEL(unsigned short canal) 
+{ //FOSC/8
 
     switch (canal) {
         case 0:
@@ -33,6 +34,7 @@ unsigned ADC_CHANNEL(unsigned short canal) { //FOSC/8
             ADCON0bits.CHS0 = 0; //CANAL 0
             break;
     }
+
 }
 
 void ADC_INIT(void) {

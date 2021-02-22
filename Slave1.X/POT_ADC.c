@@ -22,13 +22,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pic16f887.h>
+
 //******************************************************************************
 // Definiciones y Librerias
 //******************************************************************************
 #define _XTAL_FREQ 8000000 //Libreria de Delay 
 #include "Lib_ADC.h"
-
+#include "SPI.h"
 //******************************************************************************
 // Funciones
 //******************************************************************************
@@ -36,6 +36,7 @@ void CONFIG_IO(void);
 void OSCILADOR(void);
 void ADC_INTERRUPT(void);
 void ADC(void);//
+void INTER(void);
 //void Mandar1(void);
 //******************************************************************************
 // Variables
@@ -43,19 +44,34 @@ void ADC(void);//
 double volt;//Variable para voltajes de POTs
 //unsigned int result_adc;
 
-
+//*****************************************************************************
+// Código de Interrupción 
+//*****************************************************************************
+void __interrupt() isr(void){
+   if(SSPIF == 1){
+        PORTD = spiRead();
+        spiWrite(PORTB);
+        SSPIF = 0;
+    }
+}
+//*****************************************************************************
+// Código Principal
+//*****************************************************************************
 void main(void) {
     CONFIG_IO();
     OSCILADOR();
     ADC_INIT();
     ADC_INTERRUPT();
+    INTER();
     
     while (1) {
         //Conversion de POT1
         ADC(); 
         //Mandar1();
         __delay_ms(1);
-
+        
+        PORTB--;
+       __delay_ms(250);
 
     }
 
@@ -75,6 +91,8 @@ void main(void) {
     PORTB = 0;
     PORTC = 0;
     PORTD = 0;
+    
+    spiInit(SPI_SLAVE_SS_EN, SPI_DATA_SAMPLE_MIDDLE, SPI_CLOCK_IDLE_LOW, SPI_IDLE_2_ACTIVE);
 }
 
 void OSCILADOR(void) {
@@ -103,4 +121,12 @@ void ADC(void) {
         volt = ((ADRESH * 5.0) / 255); //CONVERSION DE  0-5V      
     }
 
+}
+
+void INTER(void){
+    INTCONbits.GIE = 1;         // Habilitamos interrupciones
+    INTCONbits.PEIE = 1;        // Habilitamos interrupciones PEIE
+    PIR1bits.SSPIF = 0;         // Borramos bandera interrupción MSSP
+    PIE1bits.SSPIE = 1;         // Habilitamos interrupción MSSP
+    TRISAbits.TRISA5 = 1;       // Slave Select
 }
